@@ -90,6 +90,23 @@ module Enumerable
     !my_any?(*datatype, &test)
   end
 
+  def my_count(*value)
+    return length if !block_given? && value.empty?
+
+    count = 0
+    my_each { |x| count += 1 if x == value[0] } unless value.empty?
+    my_each { |x, y| count += 1 if yield(x, y) } if block_given?
+    count
+  end
+
+  def my_map
+    return to_enum(:my_map) unless block_given?
+
+    res_arr = []
+    to_a.my_each { |x, y| res_arr << yield(x, y) }
+    res_arr
+  end
+
   protected
 
   def create_block
