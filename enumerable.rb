@@ -50,66 +50,52 @@ module Enumerable
     is_2darr == false ? temp_a : temp_h
   end
 
-  def my_any?(*datatype)
-    exproc = create_block
-    for_any(exproc, datatype, &exproc)
+  def my_all?(*datatype)
+    block = create_block if !block_given? && datatype.empty?
+    return my_all?(&block) unless block.nil?
+
+    if is_a? Array
+      my_each do |x|
+        return false if (!datatype.empty? && (datatype[0].class != Regexp) && (!x.is_a? datatype[0])) ||
+                        (!datatype.empty? && (datatype[0].class == Regexp) && x.to_s.match(datatype[0]).nil?) ||
+                        (datatype.empty? && (!yield(x) || x.nil?))
+      end
+    else
+      my_each do |x, y|
+        return false if !datatype.empty? || (datatype.empty? && !yield(x, y))
+      end
+    end
+    true
   end
 
-  def my_none?(*datatype)
-    exproc = create_block
-    for_any(exproc, datatype, &exproc) == false
+  def my_any?(*datatype)
+    block = create_block if !block_given? && datatype.empty?
+    return my_any?(&block) unless block.nil?
+
+    if is_a? Array
+      my_each do |x|
+        return true if (!datatype.empty? && (datatype[0].class != Regexp) && (x.is_a? datatype[0])) ||
+                       (!datatype.empty? && (datatype[0].class == Regexp) && !x.to_s.match(datatype[0]).nil?) ||
+                       (datatype.empty? && yield(x))
+      end
+    else
+      my_each do |x, y|
+        return true if datatype.empty? || yield(x, y)
+      end
+    end
+    false
+  end
+
+  def my_none?(*datatype, &test)
+    !my_any?(*datatype, &test)
   end
 
   protected
 
-  def for_any(prc, datatype)
-    is_2darr = false
-    is_2darr = true unless self.class == Array
-    temp_response = check_if(is_2darr, self, datatype, &prc)
-    temp_response
-  end
-
-  def check_if(is_2d, obj, datatype)
-    tmp_res = false
-    if is_2d
-      obj.my_each do |x, y|
-        if check_dtype(datatype)
-          res = datatype[0].match(y.to_s) || datatype[0].match(x.to_s)
-          tmp_res = true if res != nil
-        elsif !datatype.empty?
-          tmp_res = y.is_a? datatype[0]
-          break if tmp_res
-        else
-          tmp_res = true if yield(x, y)
-        end
-      end
-    else
-      obj.my_each do |x|
-        if check_dtype(datatype)
-          res = datatype[0].match(x.to_s)
-          tmp_res = true if res != nil
-        elsif !datatype.empty?
-          tmp_res = x.is_a? datatype[0]
-          break if tmp_res
-        else
-          tmp_res = true if yield(x)
-        end
-      end
-    end
-    tmp_res
-  end
-
   def create_block
-    oexproc = proc do |x, y|
-      yield(x, y)
-    end
-    twoexproc = proc do |x|
+    exproc = proc do |x|
       x
     end
-    block_given? ? oexproc : twoexproc
-  end
-
-  def check_dtype(value)
-    value[0].class == Regexp
+    exproc
   end
 end
