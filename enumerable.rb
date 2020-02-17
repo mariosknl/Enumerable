@@ -17,6 +17,7 @@ module Enumerable
         count += 1
       end
     end
+    self.class == Range ? self : to_a
   end
 
   def my_each_with_index
@@ -91,11 +92,11 @@ module Enumerable
   end
 
   def my_count(*value)
-    return length if !block_given? && value.empty?
+    return to_a.length if !block_given? && value.empty?
 
     count = 0
-    my_each { |x| count += 1 if x == value[0] } unless value.empty?
-    my_each { |x, y| count += 1 if yield(x, y) } if block_given?
+    to_a.my_each { |x| count += 1 if x == value[0] } unless value.empty?
+    to_a.my_each { |x, y| count += 1 if yield(x, y) } if block_given?
     count
   end
 
@@ -103,8 +104,24 @@ module Enumerable
     return to_enum(:my_map) unless block_given?
 
     res_arr = []
-    to_a.my_each { |x, y| res_arr << yield(x, y) }
+    to_a.my_each { |x| res_arr << yield(x) }
     res_arr
+  end
+
+  def my_inject(*value)
+    raise ArgumentError, "wrong number of argumets (given #{value.length}, expected 0..2" if value.length > 2
+
+    memo = !value.empty? && value[0].class != Symbol && !value[0].to_s.match(/^[a-zA-Z]/).nil? && !self[0].respond_to?(value[0]) ? value[0] : nil
+    if !value.empty? && (value[-1].class == Symbol || value[-1].class == String) && memo.nil?
+      to_a.my_each do |x|
+        memo = memo.nil? ? x : memo.send(value[-1], x)
+      end
+      return memo
+    end
+    to_a.my_each do |x|
+      memo = memo.nil? ? x : yield(memo, x)
+    end
+    memo
   end
 
   protected
