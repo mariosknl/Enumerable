@@ -38,6 +38,7 @@ module Enumerable
         count += 1
       end
     end
+    self
   end
 
   def my_select
@@ -57,9 +58,14 @@ module Enumerable
 
     if is_a? Array
       my_each do |x|
-        return false if (!datatype.empty? && (datatype[0].class != Regexp) && (!x.is_a? datatype[0])) ||
-                        (!datatype.empty? && (datatype[0].class == Regexp) && x.to_s.match(datatype[0]).nil?) ||
-                        (datatype.empty? && (!yield(x) || x.nil?))
+        unless datatype.empty?
+          return false if ((datatype[0].is_a? Class) && !(x.is_a? datatype[0])) ||
+                          ((datatype[0].is_a? Regexp) && x.to_s.match(datatype[0]).nil?) ||
+                          !((datatype[0].is_a? Class) || (datatype[0].is_a? Regexp) || (x == datatype[0]))
+
+          next
+        end
+        return false unless yield(x)
       end
     else
       my_each do |x, y|
@@ -75,13 +81,19 @@ module Enumerable
 
     if is_a? Array
       my_each do |x|
-        return true if (!datatype.empty? && (datatype[0].class != Regexp) && (x.is_a? datatype[0])) ||
-                       (!datatype.empty? && (datatype[0].class == Regexp) && !x.to_s.match(datatype[0]).nil?) ||
-                       (datatype.empty? && yield(x))
+        unless datatype.empty?
+          return true if ((datatype[0].is_a? Class) && (x.is_a? datatype[0])) ||
+                         ((datatype[0].is_a? Regexp) && !x.to_s.match(datatype[0]).nil?) ||
+                         (!((datatype[0].is_a? Class) || (datatype[0].is_a? Regexp)) && (x == datatype[0]))
+
+          next
+        end
+        return true if yield(x)
       end
     else
       my_each do |x, y|
-        return true if datatype.empty? || yield(x, y)
+        p y
+        return true if block_given? && yield(x, y)
       end
     end
     false
@@ -111,8 +123,8 @@ module Enumerable
   def my_inject(*value)
     raise ArgumentError, "wrong number of argumets (given #{value.length}, expected 0..2" if value.length > 2
 
-    memo = !value.empty? && value[0].class != Symbol && !value[0].to_s.match(/^[a-zA-Z]/).nil? && !self[0].respond_to?(value[0]) ? value[0] : nil
-    if !value.empty? && (value[-1].class == Symbol || value[-1].class == String) && memo.nil?
+    memo = value.length == 2 || ((value.length == 1) && (((value[0].is_a? String) && block_given?) || (!value[0].is_a? Symbol))) ? value[0] : nil
+    if !value.empty? && (value[-1].class == Symbol || value[-1].class == String)
       to_a.my_each do |x|
         memo = memo.nil? ? x : memo.send(value[-1], x)
       end
