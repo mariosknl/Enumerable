@@ -78,8 +78,8 @@ module Enumerable
   def my_any?(*datatype)
     block = create_block if !block_given? && datatype.empty?
     return my_any?(&block) unless block.nil?
-
-    if is_a? Array
+    arr = self.to_a
+    if arr.is_a? Array
       my_each do |x|
         unless datatype.empty?
           return true if ((datatype[0].is_a? Class) && (x.is_a? datatype[0])) ||
@@ -92,7 +92,6 @@ module Enumerable
       end
     else
       my_each do |x, y|
-        p y
         return true if block_given? && yield(x, y)
       end
     end
