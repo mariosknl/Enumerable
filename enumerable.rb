@@ -80,7 +80,7 @@ module Enumerable
     return my_any?(&block) unless block.nil?
     arr = self.to_a
     if arr.is_a? Array
-      my_each do |x|
+      arr.my_each do |x|
         unless datatype.empty?
           return true if ((datatype[0].is_a? Class) && (x.is_a? datatype[0])) ||
                          ((datatype[0].is_a? Regexp) && !x.to_s.match(datatype[0]).nil?) ||
@@ -88,10 +88,11 @@ module Enumerable
 
           next
         end
+        
         return true if yield(x)
       end
     else
-      my_each do |x, y|
+      arr.my_each do |x, y|
         return true if block_given? && yield(x, y)
       end
     end
