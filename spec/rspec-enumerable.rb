@@ -27,9 +27,28 @@ describe Enumerable do
         it 'return Enumerator if no block' do
             expect(array.my_each.class).to be Enumerator
         end
+
+        it 'return Array operation result' do
+          expect(array.my_each(&arr_square)).to eql(array.each(&arr_square))
+        end
+
+        it 'return Range operation result' do
+          expect(range.my_each(&arr_square)).to eql(range.each(&arr_square))
+        end
     end
 
     describe '.my_each_with_index' do
+      it 'return Enumerator if no block' do
+        expect(array.my_each_with_index.class).to be Enumerator
+    end
+
+      it 'creates a hash from a string array' do 
+        hash_myarray = {}
+        hash = {}
+        str_array.my_each_with_index { |x, index| hash_myarray[x] = index}
+        str_array.each_with_index { |x, index| hash[x] = index}
+        expect(hash_myarray).to eql(hash)        
+      end
 
     end
 
