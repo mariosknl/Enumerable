@@ -44,11 +44,12 @@ module Enumerable
   def my_select
     return to_enum(:my_select) unless block_given?
 
+    arr = to_a
     temp_a = []
     temp_h = {}
     is_2darr = false
-    is_2darr = true unless self.class == Array
-    is_2darr == true ? my_each { |x, y| temp_h[x] = y if yield(x, y) } : my_each { |x| temp_a << x if yield(x) }
+    is_2darr = true unless arr.class == Array
+    is_2darr == true ? arr.my_each { |x, y| temp_h[x] = y if yield(x, y) } : arr.my_each { |x| temp_a << x if yield(x) }
     is_2darr == false ? temp_a : temp_h
   end
 
@@ -79,8 +80,9 @@ module Enumerable
     block = create_block if !block_given? && datatype.empty?
     return my_any?(&block) unless block.nil?
 
-    if is_a? Array
-      my_each do |x|
+    arr = to_a
+    if arr.is_a? Array
+      arr.my_each do |x|
         unless datatype.empty?
           return true if ((datatype[0].is_a? Class) && (x.is_a? datatype[0])) ||
                          ((datatype[0].is_a? Regexp) && !x.to_s.match(datatype[0]).nil?) ||
@@ -88,11 +90,11 @@ module Enumerable
 
           next
         end
+
         return true if yield(x)
       end
     else
-      my_each do |x, y|
-        p y
+      arr.my_each do |x, y|
         return true if block_given? && yield(x, y)
       end
     end
