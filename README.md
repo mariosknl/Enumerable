@@ -38,6 +38,12 @@ Rubocop lint
 
 ## Authors
 
+👤 **Eduardo Cruz**
+
+- Github: [EdCrux](https://github.com/EdCrux)
+- Twitter: [@Eduardo79973490](https://twitter.com/twitterhandle)
+- Linkedin: [linkedin](www.linkedin.com/in/edcrux)
+
 👤 **Marian Cristu**
 
 - Github: [mariancristu](https://github.com/mariancristu)
