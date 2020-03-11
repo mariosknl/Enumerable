@@ -43,6 +43,7 @@ module Enumerable
 
   def my_select
     return to_enum(:my_select) unless block_given?
+
     arr = to_a
     temp_a = []
     temp_h = {}
@@ -78,7 +79,8 @@ module Enumerable
   def my_any?(*datatype)
     block = create_block if !block_given? && datatype.empty?
     return my_any?(&block) unless block.nil?
-    arr = self.to_a
+
+    arr = to_a
     if arr.is_a? Array
       arr.my_each do |x|
         unless datatype.empty?
@@ -88,7 +90,7 @@ module Enumerable
 
           next
         end
-        
+
         return true if yield(x)
       end
     else
